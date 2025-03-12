@@ -1,0 +1,47 @@
+version: '3.9'
+
+services:
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: moment082
+      MYSQL_DATABASE: file
+      MYSQL_USER: moment
+      MYSQL_PASSWORD: moment
+    volumes:
+      - mysql-data:/var/lib/mysql
+    restart: always
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - '6379:6379'
+    environment:
+      - REDIS_PASSWORD=moment
+    command: redis-server --requirepass moment
+    volumes:
+      - redis-data:/data
+    restart: always
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    environment:
+      MINIO_ROOT_USER: fileprocess
+      MINIO_ROOT_PASSWORD: fileprocess082
+    command: minio server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+    restart: always
+
+volumes:
+  mysql-data:
+  redis-data:
+  minio-data:
