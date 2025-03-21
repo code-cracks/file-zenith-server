@@ -7,6 +7,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { registerFastifyPlugin } from './common/fastify';
 import metadata from './metadata';
+import { MetricsInterceptor } from './metrics/metrics.interceptor';
+import { MetricsService } from './metrics/metrics.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -20,13 +22,20 @@ async function bootstrap() {
   await registerFastifyPlugin(app, fastifyMultipart);
 
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:8080',
+      'http://localhost:4000',
+      'http://127.0.0.1:8080',
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
     allowedHeaders: 'Content-Type, Accept, Authorization',
   });
 
-  app.setGlobalPrefix('api/v1/');
+  app.setGlobalPrefix('api/v1', {
+    exclude: ['metrics', 'test-metrics'],
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -35,6 +44,10 @@ async function bootstrap() {
       forbidNonWhitelisted: true, // 拒绝非白名单中的字段
     }),
   );
+
+  // 添加指标拦截器
+  const metricsService = app.get(MetricsService);
+  app.useGlobalInterceptors(new MetricsInterceptor(metricsService));
 
   const config = new DocumentBuilder().setTitle('接口文档').setVersion('1.0').build();
 
@@ -46,20 +59,13 @@ async function bootstrap() {
     jsonDocumentUrl: 'openApiJson',
   });
 
-  await app.listen(
-    {
-      port: 8080,
-      host: '0.0.0.0',
-    },
-    (err, address) => {
-      if (err) {
-        console.error('Error starting server:', err);
-        process.exit(1);
-      }
-
-      console.log(`Server is running on ${address}`);
-    },
-  );
+  try {
+    await app.listen(8080, '0.0.0.0');
+    console.log(`Server is running on http://0.0.0.0:8080`);
+  } catch (err) {
+    console.error('Error starting server:', err);
+    process.exit(1);
+  }
 }
 
 bootstrap();

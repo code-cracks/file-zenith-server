@@ -6,6 +6,8 @@ import { TimeoutInterceptor } from './core/interceptor/timeout.interceptor';
 import { AllExceptionFilter } from './core/filter/all-exception.filter';
 import { TransformInterceptor } from './core/interceptor/transform.interceptor';
 import { LogsModule } from './common/logs/logs.module';
+import { MetricsModule } from './metrics/metrics.module';
+import { MModule } from './api/m/m.module';
 
 const NODE_ENV = process.env.NODE_ENV === 'development' ? 'development' : 'production';
 
@@ -16,6 +18,8 @@ const NODE_ENV = process.env.NODE_ENV === 'development' ? 'development' : 'produ
       envFilePath: `.env.${NODE_ENV}`,
     }),
     LogsModule,
+    MetricsModule,
+    MModule,
   ],
   controllers: [],
   providers: [
