@@ -1,0 +1,23 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  scrape_timeout: 10s
+
+rule_files:
+  - 'rules/*.yml'
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scheme: http
+    tls_config:
+      insecure_skip_verify: false
+
+  - job_name: 'nestjs'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['127.0.0.1:8080']
+    scrape_interval: 5s
+    tls_config:
+      insecure_skip_verify: true
