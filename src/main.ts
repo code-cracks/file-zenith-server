@@ -22,12 +22,7 @@ async function bootstrap() {
   await registerFastifyPlugin(app, fastifyMultipart);
 
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'http://localhost:8080',
-      'http://localhost:4000',
-      'http://127.0.0.1:8080',
-    ],
+    origin: 'http://localhost:3000',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
     allowedHeaders: 'Content-Type, Accept, Authorization',
